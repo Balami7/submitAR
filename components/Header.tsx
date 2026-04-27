@@ -23,10 +23,10 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-3">
           <div className="relative w-34 h-14 bg-black rounded flex items-center justify-center">
             <Image 
-              src="/logo.jpeg" 
+              src="/22.jpeg" 
               alt="SubmitAR Logo" 
-              width={28} 
-              height={28}
+              width={100} 
+              height={100}
               className="object-contain"
             />
           </div>

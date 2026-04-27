@@ -32,7 +32,7 @@ export default function HowItWorks() {
         
         {/* Section Heading */}
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-16">
-          How Submitar works
+          How SubmitAR works
         </h2>
 
         {/* Steps Grid */}

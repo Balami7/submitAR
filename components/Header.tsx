@@ -25,8 +25,8 @@ export default function Header() {
             <Image 
               src="/22.jpeg" 
               alt="SubmitAR Logo" 
-              width={100} 
-              height={100}
+              width={140} 
+              height={140}
               className="object-contain"
             />
           </div>

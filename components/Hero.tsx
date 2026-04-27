@@ -20,7 +20,7 @@ export default function Hero() {
             
             {/* Reduced bottom margin */}
             <p className="text-md text-gray-500 mb-6 max-w-md">
-              We handle documents submissions, meeting, and follow ups on your behalf with trusted representatives.
+              We handle global documents submissions, meeting, and follow ups on your behalf with trusted representatives.
             </p>
 
             {/* Compact Buttons */}

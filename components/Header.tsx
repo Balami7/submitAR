@@ -8,11 +8,11 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: 'Services', href: '/services' },
-    { name: 'How It Works', href: '/how-it-works' },
-    { name: 'Pricing', href: '/pricing' },
+    { name: 'Services', href: '#Services' },
+    { name: 'How It Works', href: '#Howitworks' },
+    { name: 'Pricing', href: '#Pricing' },
     { name: 'Terms & Conditions', href: '/terms' },
-    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
   ];
 
   return (

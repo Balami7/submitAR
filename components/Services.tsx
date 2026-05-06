@@ -1,4 +1,7 @@
+"use client";
+
 import React from 'react';
+import { motion } from 'framer-motion';
 import { HiOutlineLibrary, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineTruck } from 'react-icons/hi';
 
 export default function Services() {
@@ -26,34 +29,36 @@ export default function Services() {
   ];
 
   return (
-    <section className="bg-white py-16">
+    <section id="Services" className="bg-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* The "Our Services" Heading */}
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-12">
+        <motion.h2 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.5 }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl font-bold text-center text-gray-900 mb-12"
+        >
           Our Services
-        </h2>
+        </motion.h2>
 
-        {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <div 
-              key={index} 
-              className="bg-gray-100 rounded-xl p-8 flex flex-col items-center text-center transition-transform hover:scale-105"
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.1 }} 
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={{ scale: 1.05 }}
+              className="bg-gray-100 rounded-xl p-8 flex flex-col items-center text-center cursor-default shadow-sm hover:shadow-md transition-shadow"
             >
-              {/* Icon Container */}
               <div className="bg-[#0052cc] text-white p-3 rounded-lg mb-6">
                 {service.icon}
               </div>
-
-              {/* Text Content */}
-              <h3 className="text-lg font-bold text-gray-900 mb-3">
-                {service.title}
-              </h3>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {service.description}
-              </p>
-            </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">{service.title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{service.description}</p>
+            </motion.div>
           ))}
         </div>
       </div>

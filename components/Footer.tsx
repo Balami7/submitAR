@@ -39,7 +39,7 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-black mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-gray-500">
-              <li><Link href="/about" className="hover:text-black">About Us</Link></li>
+              <li><Link href="/admin-signin" className="hover:text-black">About Us</Link></li>
               <li><Link href="/services" className="hover:text-black">Services</Link></li>
               <li><Link href="/how-it-works" className="hover:text-black">How it works</Link></li>
               <li><Link href="/pricing" className="hover:text-black">Pricing</Link></li>
@@ -59,7 +59,7 @@ export default function Footer() {
             <h4 className="font-bold text-black mb-4">Contact</h4>
             <ul className="space-y-3 text-sm text-gray-500">
               <li className="flex items-center gap-2"><HiOutlinePhone className="text-lg" /> +234 816 602 7757</li>
-              <li className="flex items-center gap-2"><HiOutlineMail className="text-lg" /> support@submitar.ng</li>
+              <li className="flex items-center gap-2"><HiOutlineMail className="text-lg" /> support@submitar.com</li>
               <li className="flex items-center gap-2"><HiOutlineLocationMarker className="text-lg" /> Abuja, Nigeria</li>
             </ul>
           </div>

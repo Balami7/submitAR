@@ -5,9 +5,9 @@ export const metadata: Metadata = {
   title: 'Submitar',
   description: 'Submitar — Fast, clean, and powerful submission tool.',
   icons: {
-    icon: '/logo.joeg',           
-    shortcut: '/logo.jpeg',
-    apple: '/logo.jpeg', 
+    icon: '/logo.png',           
+    shortcut: '/logo.png',
+    apple: '/logo.png', 
   },
 };
 

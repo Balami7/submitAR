@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-black p-1.5 rounded">
-                <Image src="/logo.jpeg" alt="Logo" width={60} height={24} />
+                <Image src="/SUBMITAR B.png" alt="Logo" width={60} height={24} />
               </div>
               <span className="text-xl text-black font-bold">SubmitAR</span>
             </div>

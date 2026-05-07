@@ -1176,12 +1176,6 @@ export default function SubmitarForm() {
                         </div>
                         <p className="text-2xl font-extrabold text-[#0052cc]">{fmt(total)}</p>
                       </div>
-                      <div className="bg-blue-50 px-6 py-3 border-t border-blue-100">
-                        <p className="text-xs text-blue-700 font-medium flex items-center gap-2">
-                          <MdCreditCard className="text-blue-500 text-sm shrink-0" />
-                          Payment instructions will be shared after your request is reviewed. No upfront payment required to submit.
-                        </p>
-                      </div>
                     </div>
                   </div>
                 )}

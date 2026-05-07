@@ -48,7 +48,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-34 h-14 bg-black rounded flex items-center justify-center">
               <Image
-                src="/22.jpeg"
+                src="/sub.png"
                 alt="SubmitAR Logo"
                 width={140}
                 height={140}

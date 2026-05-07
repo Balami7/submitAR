@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Submitar',
+  title: 'SubmitAR',
   description: 'Submitar — Fast, clean, and powerful submission tool.',
   icons: {
     icon: '/logo.png',           

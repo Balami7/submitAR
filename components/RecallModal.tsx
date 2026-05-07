@@ -110,7 +110,7 @@ export default function RecallModal({ isOpen, onClose, onVerified }: RecallModal
         {step === "input" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>
-              Retrieve your saved order using your phone number or email address.
+              Track, or Retrieve your saved order using your phone number or email address.
             </p>
 
             {/* Method selector */}

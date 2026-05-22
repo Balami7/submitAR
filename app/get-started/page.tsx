@@ -1377,10 +1377,14 @@ export default function SubmitarForm() {
                     </div>
                   )}
 
-                  <button type="submit"
-                    className="w-full bg-blue-700 text-white font-bold py-5 rounded-lg text-xl hover:bg-blue-800 transition-colors shadow-lg">
-                    Review Request
-                  </button>
+                  <button 
+                  type="button" 
+                  onClick={() => window.location.href = '/review'}
+                  className="w-full bg-blue-700 text-white font-bold py-5 rounded-lg text-xl hover:bg-blue-800 transition-colors shadow-lg"
+                > 
+                  Review Request 
+                </button>
+
                 </div>
               </>
             )}

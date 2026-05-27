@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id                String    @id @default(cuid())
+  csn               String    @unique  // e.g. CSN-2405141
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Services
+  primaryService    String    // submission | followup | representation | retrieval
+  addOns            String[]  // array of add-on service ids
+
+  // Document receive method
+  receiveMethod     String?   // upload | text | hardcopy
+  hardcopyType      String?   // personal | courier
+  uploadedFileUrl   String?
+  uploadDesc        String?
+  docType           String?
+  docText           String?
+  formattingStyle   String?
+
+  // Pickup details
+  pickupAddress     String?
+  pickupDate        DateTime?
+  pickupTime        String?
+  pickupContact     String?
+  pickupPhone       String?
+  pickupNumDocs     Int?
+  pickupInstructions String?
+
+  // Courier details
+  courierCompany    String?
+  courierTracking   String?
+  courierContact    String?
+  courierPickupLoc  String?
+  courierInstructions String?
+
+  // Submission details
+  submissionLocation  String?
+  submissionDate      DateTime?
+  submissionInstructions String?
+  wantsFollowUp       Boolean   @default(false)
+  followUpFrequency   String?   // weekly4 | biweekly | single
+
+  // Follow-up (standalone)
+  followupDate      DateTime?
+  followupLocation  String?
+  followupStatus    String?
+  followupRef       String?
+
+  // Representation
+  repOrg            String?
+  repOrgAddress     Json?     // { street, city, state, country, landmark }
+  repGender         String?
+  repPurpose        String?   // attendance | speaking
+  repTopic          String?
+  repScript         String?
+  repFileUrl        String?
+
+  // Retrieval
+  retrievalItem     String?
+  retrievalLocation String?
+  retrievalLocAddress Json?
+  retrievalDate     DateTime?
+  retrievalStatus   String?
+  retrievalDelivery String?   // home | office | pickup
+  deliveryDistance  String?
+  retrievalDeliveryAddress Json?
+
+  // Document category
+  isCompanyDocument String?   // company | personal
+
+  // Company verification
+  companyName       String?
+  companyCac        String?
+  companyPosition   String?
+  companyIdCardUrl  String?
+  companyAuthMethod String?
+  companyAddress    Json?
+  companyAuthLetterUrl String?
+
+  // Identity
+  authLetterUrl     String?
+  identityType      String?
+  identityNumber    String?
+  identityImageUrl  String?
+  identitySelfieUrl String?
+
+  // Personal info
+  fullName          String?
+  phone             String?
+  email             String?
+  country           String?
+  state             String?
+  city              String?
+  landmark          String?
+  streetAddress     String?
+
+  // Pricing
+  lineItems         Json      // [{ label, amount, note }]
+  total             Int
+
+  // Status
+  status            OrderStatus @default(PENDING)
+  adminNotes        String?
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hashed
+  name      String
+  createdAt DateTime @default(now())
+
+  @@map("admins")
+}

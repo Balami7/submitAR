@@ -479,7 +479,7 @@ export default function SubmitarForm() {
     confirmDetails, confirmAuthorize, submitAttempted,
   ]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitAttempted(true);
     const validationErrors = validate();
@@ -488,8 +488,155 @@ export default function SubmitarForm() {
       document.querySelector('[data-error="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    console.log('Form submitted successfully');
-    // You can add your submission logic here
+    
+    try {
+      // Build FormData for multipart submission (includes file uploads)
+      const formData = new FormData();
+      
+      // Core service info
+      formData.append('primaryService', primaryService);
+      formData.append('addOns', JSON.stringify(addOns));
+      formData.append('receiveMethod', receiveMethod);
+      formData.append('lineItems', JSON.stringify(lineItems));
+      formData.append('total', total.toString());
+      
+      // Document upload fields
+      if (receiveMethod === 'upload') {
+        formData.append('uploadDesc', uploadDesc);
+        formData.append('docType', docType);
+        formData.append('docText', docText);
+        formData.append('formattingStyle', formattingStyle);
+        if (uploadFile) formData.append('uploadFile', uploadFile);
+      }
+      
+      // Hardcopy delivery
+      if (receiveMethod === 'hardcopy') {
+        formData.append('hardcopyDeliveryType', hardcopyDeliveryType);
+        if (hardcopyDeliveryType === 'personal') {
+          formData.append('pickupAddress', pickupAddress);
+          formData.append('pickupDate', pickupDate);
+          formData.append('pickupTime', pickupTime);
+          formData.append('pickupContact', pickupContact);
+          formData.append('pickupPhone', pickupPhone);
+          formData.append('pickupNumDocs', pickupNumDocs);
+          formData.append('pickupInstructions', pickupInstructions);
+        } else if (hardcopyDeliveryType === 'courier') {
+          formData.append('courierCompany', courierCompany);
+          formData.append('courierTracking', courierTracking);
+          formData.append('courierContact', courierContact);
+          formData.append('courierPickupLocation', courierPickupLocation);
+          formData.append('courierInstructions', courierInstructions);
+        }
+      }
+      
+      // Submission details
+      if (has('submission')) {
+        formData.append('submissionLocation', submissionLocation);
+        formData.append('submissionDate', submissionDate);
+        formData.append('submissionInstructions', submissionInstructions);
+      }
+      
+      // Follow-up details
+      if (wantsFollowUp === 'yes' || primaryService === 'followup') {
+        formData.append('wantsFollowUp', 'yes');
+        formData.append('followUpFrequency', followUpFrequency);
+        formData.append('followupDate', followupDate);
+        formData.append('followupLocation', followupLocation);
+        formData.append('followupStatus', followupStatus);
+        formData.append('followupRef', followupRef);
+      }
+      
+      // Representation details
+      if (has('representation')) {
+        formData.append('repOrg', repOrg);
+        formData.append('repOrgStreet', repOrgStreet);
+        formData.append('repOrgCity', repOrgCity);
+        formData.append('repOrgState', repOrgState);
+        formData.append('repOrgCountry', repOrgCountry);
+        formData.append('repOrgLandmark', repOrgLandmark);
+        formData.append('repGender', repGender);
+        formData.append('repPurpose', repPurpose);
+        formData.append('repTopic', repTopic);
+        formData.append('repScript', repScript);
+        if (repFile) formData.append('repFile', repFile);
+      }
+      
+      // Retrieval details
+      if (has('retrieval')) {
+        formData.append('retrievalItem', retrievalItem);
+        formData.append('retrievalLocationVal', retrievalLocationVal);
+        formData.append('retrievalLocStreet', retrievalLocStreet);
+        formData.append('retrievalLocCity', retrievalLocCity);
+        formData.append('retrievalLocState', retrievalLocState);
+        formData.append('retrievalLocCountry', retrievalLocCountry);
+        formData.append('retrievalDate', retrievalDate);
+        formData.append('retrievalStatus', retrievalStatus);
+        formData.append('retrievalDelivery', retrievalDelivery);
+        formData.append('deliveryDistance', deliveryDistance);
+        formData.append('retrievalDeliveryStreet', retrievalDeliveryStreet);
+        formData.append('retrievalDeliveryCity', retrievalDeliveryCity);
+        formData.append('retrievalDeliveryState', retrievalDeliveryState);
+        formData.append('retrievalDeliveryCountry', retrievalDeliveryCountry);
+      }
+      
+      // Company document verification
+      if (isCompanyDocument === 'company') {
+        formData.append('isCompanyDocument', 'company');
+        formData.append('companyName', companyName);
+        formData.append('companyCac', companyCac);
+        formData.append('companyPosition', companyPosition);
+        formData.append('companyAuthMethod', companyAuthMethod);
+        if (companyIdCard) formData.append('companyIdCard', companyIdCard);
+        if (companyAuthLetter) formData.append('companyAuthLetter', companyAuthLetter);
+        formData.append('companyStreet', companyStreet);
+        formData.append('companyCity', companyCity);
+        formData.append('companyState', '');
+        formData.append('companyCountry', companyCountry);
+      } else if (isCompanyDocument === 'personal') {
+        formData.append('isCompanyDocument', 'personal');
+        formData.append('identityType', identityType);
+        formData.append('identityNumber', identityNumber);
+      }
+      
+      // Contact info
+      formData.append('fullName', fullName);
+      formData.append('phone', phone);
+      formData.append('email', email);
+      formData.append('country', country);
+      formData.append('stateVal', stateVal);
+      formData.append('city', city);
+      formData.append('streetAddress', streetAddress);
+      
+      // Submit to API
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || `API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Save to sessionStorage and redirect
+      sessionStorage.setItem('orderReview', JSON.stringify({
+        csn: data.csn,
+        lineItems,
+        total,
+        fullName,
+        phone,
+        email,
+        streetAddress,
+        city,
+      }));
+      
+      window.location.href = '/review';
+    } catch (error) {
+      console.error('Form submission error:', error);
+      alert('Failed to submit form. Please try again.');
+    }
   };
 
   // ─── Order summary ────────────────────────────────────────────────────────
@@ -1378,8 +1525,7 @@ export default function SubmitarForm() {
                   )}
 
                   <button 
-                  type="button" 
-                  onClick={() => window.location.href = '/review'}
+                  type="submit" 
                   className="w-full bg-blue-700 text-white font-bold py-5 rounded-lg text-xl hover:bg-blue-800 transition-colors shadow-lg"
                 > 
                   Review Request 

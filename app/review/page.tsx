@@ -52,7 +52,7 @@ export default function ReviewPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-white">
         <div className="max-w-6xl mx-auto py-12 px-6">
           <div className="flex justify-between items-center mb-10">
             <div>

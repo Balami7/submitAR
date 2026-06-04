@@ -1,11 +1,21 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error('Supabase is not configured: set SUPABASE_URL and SUPABASE_ANON_KEY');
+    }
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 export async function uploadFile(file: File, folder: string): Promise<string> {
+  const supabase = getSupabase();
   const ext = file.name.split('.').pop();
   const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 

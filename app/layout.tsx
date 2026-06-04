@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { FormProvider } from '@/context/FormContext';
+import Providers from './providers';
 
 export const metadata: Metadata = {
   title: 'SubmitAR',
@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-black antialiased">
-        <FormProvider>{children}</FormProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

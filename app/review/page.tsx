@@ -7,6 +7,35 @@ import { FaDownload, FaEdit } from 'react-icons/fa';
 export default function ReviewPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+
+  const handlePay = async () => {
+    if (!data?.email) {
+      alert('No email found for this order. Please go back and add your email.');
+      return;
+    }
+    setPaying(true);
+    try {
+      const res = await fetch('/api/paystack/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          amount: data.total,
+          csn: data.csn,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.authorization_url) {
+        throw new Error(result.error || 'Could not start payment');
+      }
+      window.location.href = result.authorization_url;
+    } catch (err: any) {
+      console.error('Payment error:', err);
+      alert(err.message || 'Failed to start payment. Please try again.');
+      setPaying(false);
+    }
+  };
 
   useEffect(() => {
     console.log('ReviewPage mounted, checking sessionStorage...');
@@ -131,8 +160,12 @@ export default function ReviewPage() {
                   >
                     <FaEdit /> Edit Request
                   </button>
-                  <button className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-semibold text-lg transition-all">
-                    Confirm & Pay
+                  <button
+                    onClick={handlePay}
+                    disabled={paying}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-semibold text-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {paying ? 'Redirecting to Paystack...' : 'Confirm & Pay'}
                   </button>
                 </div>
               </div>

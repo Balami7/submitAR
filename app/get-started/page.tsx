@@ -23,10 +23,12 @@ const PRICES = {
   followup_standalone: 35_000,
   followup_single: 35_000,
   followup_biweekly: 70_000,
+  followup_thrice: 100_000,
   followup_weekly4: 135_000,
-  submission_followup_weekly4: 120_000,
-  submission_followup_biweekly: 90_000,
   submission_followup_single: 65_000,
+  submission_followup_biweekly: 90_000,
+  submission_followup_thrice: 105_000,
+  submission_followup_weekly4: 120_000,
   representation_attendance: 50_000,
   representation_speaking: 100_000,
   retrieval: 35_000,
@@ -650,21 +652,24 @@ export default function SubmitarForm() {
 
     if (primaryService === 'submission') {
       if (hasInlineFollowUp) {
-        if (followUpFrequency === 'weekly4')  items.push({ label: 'Submission + Follow-Up (Weekly × 4)', amount: PRICES.submission_followup_weekly4, note: 'Bundled — saves ₦50,000' });
-        if (followUpFrequency === 'biweekly') items.push({ label: 'Submission + Follow-Up (Bi-weekly)', amount: PRICES.submission_followup_biweekly, note: 'Bundled — saves ₦15,000' });
         if (followUpFrequency === 'single')   items.push({ label: 'Submission + Single Follow-Up Check', amount: PRICES.submission_followup_single, note: 'Bundled — saves ₦5,000' });
+        if (followUpFrequency === 'biweekly') items.push({ label: 'Submission + Follow-Up (Bi-weekly)', amount: PRICES.submission_followup_biweekly, note: 'Bundled — saves ₦15,000' });
+        if (followUpFrequency === 'thrice')   items.push({ label: 'Submission + Follow-Up (3 Checks)', amount: PRICES.submission_followup_thrice, note: 'Bundled — saves ₦30,000' });
+        if (followUpFrequency === 'weekly4')  items.push({ label: 'Submission + Follow-Up (Weekly × 4)', amount: PRICES.submission_followup_weekly4, note: 'Bundled — saves ₦50,000' });
       } else {
         items.push({ label: 'Submission Only', amount: PRICES.submission });
       }
     }
 
     if (primaryService === 'followup') {
-      if (followUpFrequency === 'weekly4') {
-        items.push({ label: 'Follow-Up (Weekly × 4)', amount: PRICES.followup_weekly4 });
+      if (followUpFrequency === 'single') {
+        items.push({ label: 'Follow-Up (Single Check)', amount: PRICES.followup_single });
       } else if (followUpFrequency === 'biweekly') {
         items.push({ label: 'Follow-Up (Bi-weekly)', amount: PRICES.followup_biweekly });
-      } else if (followUpFrequency === 'single') {
-        items.push({ label: 'Follow-Up (Single Check)', amount: PRICES.followup_single });
+      } else if (followUpFrequency === 'thrice') {
+        items.push({ label: 'Follow-Up (3 Checks)', amount: PRICES.followup_thrice });
+      } else if (followUpFrequency === 'weekly4') {
+        items.push({ label: 'Follow-Up (Weekly × 4)', amount: PRICES.followup_weekly4 });
       } else {
         items.push({ label: 'Follow-Up (Standalone)', amount: PRICES.followup_standalone });
       }
@@ -1195,9 +1200,10 @@ export default function SubmitarForm() {
                           <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">How often should we check in?</p>
                           <div className="grid grid-cols-1 gap-2">
                             {[
-                              { id: 'weekly4',  title: 'Weekly — 4 Weeks',     sub: 'Update every week for a month',     price: '₦120,000', saving: 'Saves ₦50,000' },
-                              { id: 'biweekly', title: 'Bi-weekly — 2 Checks', sub: 'Update every two weeks',            price: '₦90,000',  saving: 'Saves ₦15,000' },
                               { id: 'single',   title: 'Single Check',          sub: 'One status check after submission', price: '₦65,000',  saving: 'Saves ₦5,000'  },
+                              { id: 'biweekly', title: 'Bi-weekly — 2 Checks', sub: 'Update every two weeks',            price: '₦90,000',  saving: 'Saves ₦15,000' },
+                              { id: 'thrice',   title: 'Thrice — 3 Checks',    sub: 'Three status checks',                price: '₦105,000', saving: 'Saves ₦30,000' },
+                              { id: 'weekly4',  title: 'Weekly — 4 Weeks',     sub: 'Update every week for a month',     price: '₦120,000', saving: 'Saves ₦50,000' },
                             ].map(opt => (
                               <label key={opt.id} className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all bg-white ${followUpFrequency === opt.id ? 'border-blue-600' : 'border-gray-200 hover:border-gray-300'}`}>
                                 <div className="flex items-center gap-3">
@@ -1246,9 +1252,10 @@ export default function SubmitarForm() {
                       </div>
                       <div className="grid grid-cols-1 gap-2">
                         {[
-                          { id: 'weekly4',  title: 'Weekly — 4 Weeks',     sub: 'Update every week for a month', price: fmt(PRICES.followup_weekly4) },
-                          { id: 'biweekly', title: 'Bi-weekly — 2 Checks', sub: 'Update every two weeks',        price: fmt(PRICES.followup_biweekly) },
                           { id: 'single',   title: 'Single Check',          sub: 'One status check',              price: fmt(PRICES.followup_single) },
+                          { id: 'biweekly', title: 'Bi-weekly — 2 Checks', sub: 'Update every two weeks',        price: fmt(PRICES.followup_biweekly) },
+                          { id: 'thrice',   title: 'Thrice — 3 Checks',    sub: 'Three status checks',            price: fmt(PRICES.followup_thrice) },
+                          { id: 'weekly4',  title: 'Weekly — 4 Weeks',     sub: 'Update every week for a month', price: fmt(PRICES.followup_weekly4) },
                         ].map(opt => (
                           <label key={opt.id} className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all bg-white ${followUpFrequency === opt.id ? 'border-blue-600' : 'border-gray-200 hover:border-gray-300'}`}>
                             <div className="flex items-center gap-3">

@@ -21,6 +21,9 @@ import {
 const PRICES = {
   submission: 35_000,
   followup_standalone: 35_000,
+  followup_single: 35_000,
+  followup_biweekly: 70_000,
+  followup_weekly4: 135_000,
   submission_followup_weekly4: 120_000,
   submission_followup_biweekly: 90_000,
   submission_followup_single: 65_000,
@@ -329,7 +332,7 @@ export default function SubmitarForm() {
   // ─── Derived helpers ──────────────────────────────────────────────────────
   const has = (id: string) => primaryService === id || addOns.includes(id);
 
-  useEffect(() => { setAddOns([]); }, [primaryService]);
+  useEffect(() => { setAddOns([]); setFollowUpFrequency(''); }, [primaryService]);
 
   const toggleAddOn = (id: string) => {
     setAddOns(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
@@ -392,6 +395,7 @@ export default function SubmitarForm() {
     if (primaryService === 'followup') {
       if (!followupDate)            e.followup_date     = 'Please enter the original submission date.';
       if (!followupLocation.trim()) e.followup_location = 'Please enter where the document was submitted.';
+      if (!followUpFrequency)       e.followup_frequency = 'Please choose a follow-up frequency.';
     }
 
     if (has('representation')) {
@@ -655,7 +659,15 @@ export default function SubmitarForm() {
     }
 
     if (primaryService === 'followup') {
-      items.push({ label: 'Follow-Up (Standalone)', amount: PRICES.followup_standalone });
+      if (followUpFrequency === 'weekly4') {
+        items.push({ label: 'Follow-Up (Weekly × 4)', amount: PRICES.followup_weekly4 });
+      } else if (followUpFrequency === 'biweekly') {
+        items.push({ label: 'Follow-Up (Bi-weekly)', amount: PRICES.followup_biweekly });
+      } else if (followUpFrequency === 'single') {
+        items.push({ label: 'Follow-Up (Single Check)', amount: PRICES.followup_single });
+      } else {
+        items.push({ label: 'Follow-Up (Standalone)', amount: PRICES.followup_standalone });
+      }
     }
 
     if (has('representation')) {
@@ -1147,7 +1159,6 @@ export default function SubmitarForm() {
                   </div>
                 )}
 
-                {/* Rest of the form remains unchanged */}
                 {/* ── 3. Submission Details ─────────────────────────────── */}
                 {has('submission') && (
                   <div className="space-y-4 pt-4 border-t">
@@ -1210,7 +1221,7 @@ export default function SubmitarForm() {
                   </div>
                 )}
 
-                {/* ── 4. Follow-up Details ──────────────────────────────── */}
+                {/* ── Standalone Follow-up Details ──────────────────────── */}
                 {primaryService === 'followup' && (
                   <div className="space-y-4 pt-4 border-t">
                     <h3 className="font-bold text-lg">2. Follow-up Details</h3>
@@ -1226,10 +1237,36 @@ export default function SubmitarForm() {
                       onChange={e => setFollowupStatus(e.target.value)} className="w-full border p-3 text-sm" />
                     <input type="text" placeholder="Reference Number (if any)" value={followupRef}
                       onChange={e => setFollowupRef(e.target.value)} className="w-full border p-3 text-sm" />
+
+                    {/* Follow-up frequency selector */}
+                    <div className="mt-2 border border-blue-100 rounded-xl p-4 bg-blue-50 space-y-3" data-error={!!errors.followup_frequency}>
+                      <div>
+                        <p className="font-bold text-sm text-gray-800">How often should we check in?</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Choose your follow-up cadence.</p>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { id: 'weekly4',  title: 'Weekly — 4 Weeks',     sub: 'Update every week for a month', price: fmt(PRICES.followup_weekly4) },
+                          { id: 'biweekly', title: 'Bi-weekly — 2 Checks', sub: 'Update every two weeks',        price: fmt(PRICES.followup_biweekly) },
+                          { id: 'single',   title: 'Single Check',          sub: 'One status check',              price: fmt(PRICES.followup_single) },
+                        ].map(opt => (
+                          <label key={opt.id} className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all bg-white ${followUpFrequency === opt.id ? 'border-blue-600' : 'border-gray-200 hover:border-gray-300'}`}>
+                            <div className="flex items-center gap-3">
+                              <input type="radio" name="standaloneFollowupFreq" checked={followUpFrequency === opt.id} onChange={() => setFollowUpFrequency(opt.id)} />
+                              <div>
+                                <p className="text-sm font-semibold text-gray-800">{opt.title}</p>
+                                <p className="text-xs text-gray-500">{opt.sub}</p>
+                              </div>
+                            </div>
+                            <p className="text-sm font-bold text-blue-700">{opt.price}</p>
+                          </label>
+                        ))}
+                      </div>
+                      <FieldError msg={errors.followup_frequency} />
+                    </div>
                   </div>
                 )}
 
-                {/* Primary Representation & Retrieval sections remain the same */}
                 {primaryService === 'representation' && (
                   <div className="space-y-4 pt-4 border-t">
                     <h3 className="font-bold text-lg">2. Representation Details</h3>
@@ -1244,225 +1281,219 @@ export default function SubmitarForm() {
                   </div>
                 )}
 
-                {/* ── Secondary Service Upsells — details render inline ─── */}
-                               {primaryService && secondaryOptions.length > 0 && (
-                                 <div className="space-y-4 pt-4 border-t">
-                                   <h3 className="font-bold text-lg">Would You Like to Add Any of These?</h3>
-                                   <p className="text-sm text-gray-500">These optional services can be bundled with your {primaryService} request.</p>
-                                   <div className="grid grid-cols-1 gap-3">
-                                     {secondaryOptions.map(opt => {
-                                       const isChosen = addOns.includes(opt.id);
-                                       return (
-                                         <div key={opt.id}>
-                                           {/* ── Checkbox card ── */}
-                                           <label
-                                             className={`flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${isChosen ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                                           >
-                                             <input
-                                               type="checkbox"
-                                               checked={isChosen}
-                                               onChange={() => toggleAddOn(opt.id)}
-                                               className="mt-0.5"
-                                             />
-                                             <div className="flex-1">
-                                               <div className="flex items-center justify-between">
-                                                 <p className="font-semibold text-gray-800 text-sm">{opt.label}</p>
-                                                 <span className="text-sm font-bold text-blue-600">{opt.price}</span>
-                                               </div>
-                                               <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
-                                             </div>
-                                           </label>
-               
-                                           {/* ── Details expand directly below the checkbox ── */}
-                                           {isChosen && opt.id === 'representation' && (
-                                             <div className="border-2 border-blue-200 border-t-0 rounded-b-xl bg-blue-50/40 px-4 pb-4">
-                                               <RepresentationDetails isAddOn />
-                                             </div>
-                                           )}
-                                           {isChosen && opt.id === 'retrieval' && (
-                                             <div className="border-2 border-blue-200 border-t-0 rounded-b-xl bg-blue-50/40 px-4 pb-4">
-                                               <RetrievalDetails isAddOn />
-                                             </div>
-                                           )}
-                                         </div>
-                                       );
-                                     })}
-                                   </div>
-                                 </div>
-                               )}
-               
-                               {/* ── Document Category ──────────────────────────────────── */}
-                               {needsDocCategory && (
-                                 <div className="space-y-4 pt-4 border-t">
-                                   <h3 className="font-bold text-lg">Document Category</h3>
-                                   <p className="text-sm">Is this a Company Document or Personal Document?</p>
-                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-error={!!errors.docCategory}>
-                                     <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer ${isCompanyDocument === 'company' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}>
-                                       <input type="radio" name="docCategory" checked={isCompanyDocument === 'company'} onChange={() => setIsCompanyDocument('company')} />
-                                       <FaBuilding className="text-blue-500" /> <span>Company Document</span>
-                                     </label>
-                                     <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer ${isCompanyDocument === 'personal' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}>
-                                       <input type="radio" name="docCategory" checked={isCompanyDocument === 'personal'} onChange={() => setIsCompanyDocument('personal')} />
-                                       <FaUser className="text-blue-500" /> <span>Personal / Individual</span>
-                                     </label>
-                                   </div>
-                                   <FieldError msg={errors.docCategory} />
-                                 </div>
-                               )}
-               
-                               {/* ── Company Verification ───────────────────────────────── */}
-                               {needsDocCategory && isCompanyDocument === 'company' && (
-                                 <div className="space-y-4 pt-4 border-t bg-gray-50 p-4 rounded">
-                                   <h3 className="font-bold text-lg flex items-center gap-2"><FaBuilding /> Company Verification</h3>
-                                   <input type="text" placeholder="Company Name" value={companyName}
-                                     onChange={e => setCompanyName(e.target.value)} data-error={!!errors.company_name}
-                                     className={`w-full border p-3 text-sm bg-white ${errBorder(errors.company_name)}`} />
-                                   <FieldError msg={errors.company_name} />
-                                   <input type="text" placeholder="Company Registration Number (CAC)" value={companyCac}
-                                     onChange={e => setCompanyCac(e.target.value)} data-error={!!errors.company_cac}
-                                     className={`w-full border p-3 text-sm bg-white ${errBorder(errors.company_cac)}`} />
-                                   <FieldError msg={errors.company_cac} />
-               
-                                   {/* Company Address */}
-                                   <p className="text-sm font-bold">Company Address</p>
-                                   <AddressBlock
-                                     streetAddress={companyStreet} setStreetAddress={setCompanyStreet}
-                                     city={companyCity} setCity={setCompanyCity}
-                                     country={companyCountry} setCountry={setCompanyCountry}
-                                     stateVal={companyState} setStateVal={setCompanyState}
-                                   />
-               
-                                   <p className="text-sm font-bold pt-2">Your Position in the Company:</p>
-                                   <div className="flex flex-wrap gap-6" data-error={!!errors.company_position}>
-                                     {['Director', 'Manager', 'Staff', 'Other'].map(pos => (
-                                       <label key={pos} className="flex items-center gap-2">
-                                         <input type="radio" name="pos" checked={companyPosition === pos} onChange={() => setCompanyPosition(pos)} /> {pos}
-                                       </label>
-                                     ))}
-                                   </div>
-                                   <FieldError msg={errors.company_position} />
-                                   <label className="text-xs font-bold block">Upload Office ID Card</label>
-                                   <input type="file" data-error={!!errors.company_idCard}
-                                     onChange={e => setCompanyIdCard(e.target.files?.[0] ?? null)}
-                                     className={`w-full border p-2 bg-white ${errBorder(errors.company_idCard)}`} />
-                                   <FieldError msg={errors.company_idCard} />
-                                   <p className="font-bold text-sm underline pt-4">Company Authorization Method</p>
-                                   <div data-error={!!errors.company_auth}>
-                                     <label className="flex items-center gap-2 font-medium text-sm">
-                                       <input type="radio" name="c-auth" checked={companyAuthMethod === 'otp'}
-                                         onChange={() => { setCompanyAuthMethod('otp'); setOtpSent(null); }} />
-                                       Verify via OTP (pulled from CAC records)
-                                     </label>
-                                     {companyAuthMethod === 'otp' && (
-                                       <div className="pl-6 space-y-3 mt-2">
-                                         <p className="text-xs text-gray-500">Your registered contact details will be retrieved automatically from the CAC database.</p>
-                                         <div className="flex gap-3">
-                                           <button type="button" onClick={() => setOtpSent('email')}
-                                             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-sm font-semibold transition-all ${otpSent === 'email' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}>
-                                             <MdEmail className="text-base" /> Get OTP via Email
-                                           </button>
-                                           <button type="button" onClick={() => setOtpSent('mobile')}
-                                             className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-sm font-semibold transition-all ${otpSent === 'mobile' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}>
-                                             <MdPhone className="text-base" /> Get OTP via Mobile
-                                           </button>
-                                         </div>
-                                         {otpSent && (
-                                           <div className="space-y-2">
-                                             <p className="text-xs text-green-700 font-medium">OTP sent to your CAC-registered {otpSent === 'email' ? 'email address' : 'mobile number'}.</p>
-                                             <input type="text" placeholder="Enter OTP" value={otpValue}
-                                               onChange={e => setOtpValue(e.target.value)} data-error={!!errors.company_otp}
-                                               className={`w-full border p-2 text-sm bg-white ${errBorder(errors.company_otp)}`} />
-                                             <FieldError msg={errors.company_otp} />
-                                           </div>
-                                         )}
-                                       </div>
-                                     )}
-                                     <label className="flex items-center gap-2 mt-4 font-medium text-sm">
-                                       <input type="radio" name="c-auth" checked={companyAuthMethod === 'letter'}
-                                         onChange={() => { setCompanyAuthMethod('letter'); setOtpSent(null); }} />
-                                       Upload Signed / Stamped Authorization Letter
-                                     </label>
-                                     {companyAuthMethod === 'letter' && (
-                                       <div className="pl-6 mt-2">
-                                         <input type="file" onChange={e => setCompanyAuthLetter(e.target.files?.[0] ?? null)} className="w-full border p-2 bg-white" />
-                                       </div>
-                                     )}
-                                   </div>
-                                   <FieldError msg={errors.company_auth} />
-                                 </div>
-                               )}
-               
-                               {/* ── Authorization & Identity ───────────────────────────── */}
-                               {needsAuthSection && (
-                                 <div className="space-y-4 pt-4 border-t">
-                                   <h3 className="font-bold text-lg">Authorization & Identity Verification (REQUIRED)</h3>
-                                   <p className="text-sm font-bold">Letter of Authorization:</p>
-                                   <input type="file" data-error={!!errors.auth_letter}
-                                     onChange={e => setAuthLetter(e.target.files?.[0] ?? null)}
-                                     className={`w-full border p-2 ${errBorder(errors.auth_letter)}`} />
-                                   <FieldError msg={errors.auth_letter} />
-                                   <p className="text-sm font-bold">Identity Verification:</p>
-                                   <select value={identityType} onChange={e => setIdentityType(e.target.value)}
-                                     data-error={!!errors.identity_type}
-                                     className={`w-full border p-3 text-sm ${errBorder(errors.identity_type)}`}>
-                                     <option value="">Select ID Type...</option>
-                                     <option value="nin">NIN</option>
-                                     <option value="passport">International Passport</option>
-                                   </select>
-                                   <FieldError msg={errors.identity_type} />
-                                   <input type="text" placeholder="ID Number" value={identityNumber}
-                                     onChange={e => setIdentityNumber(e.target.value)} data-error={!!errors.identity_number}
-                                     className={`w-full border p-3 text-sm ${errBorder(errors.identity_number)}`} />
-                                   <FieldError msg={errors.identity_number} />
-                                   <label className="text-xs font-bold block">Upload ID Image</label>
-                                   <input type="file" data-error={!!errors.identity_image}
-                                     onChange={e => setIdentityImage(e.target.files?.[0] ?? null)}
-                                     className={`w-full border p-2 ${errBorder(errors.identity_image)}`} />
-                                   <FieldError msg={errors.identity_image} />
-                                   <label className="text-xs font-bold block">Upload Your Photo (Selfie)</label>
-                                   <input type="file" data-error={!!errors.identity_selfie}
-                                     onChange={e => setIdentitySelfie(e.target.files?.[0] ?? null)}
-                                     className={`w-full border p-2 ${errBorder(errors.identity_selfie)}`} />
-                                   <FieldError msg={errors.identity_selfie} />
-                                 </div>
-                               )}
-               
-                               {/* ── Personal Information ───────────────────────────────── */}
-                               {needsAuthSection && (
-                                 <div className="space-y-4 pt-4 border-t">
-                                   <h3 className="font-bold text-lg">Your Information</h3>
-                                   <input type="text" placeholder="Full Name" value={fullName}
-                                     onChange={e => setFullName(e.target.value)} data-error={!!errors.info_name}
-                                     className={`w-full border p-3 text-sm ${errBorder(errors.info_name)}`} />
-                                   <FieldError msg={errors.info_name} />
-                                   <input type="tel" placeholder="Phone Number" value={phone}
-                                     onChange={e => setPhone(e.target.value)} data-error={!!errors.info_phone}
-                                     className={`w-full border p-3 text-sm ${errBorder(errors.info_phone)}`} />
-                                   <FieldError msg={errors.info_phone} />
-                                   <input type="email" placeholder="Email" value={email}
-                                     onChange={e => setEmail(e.target.value)} data-error={!!errors.info_email}
-                                     className={`w-full border p-3 text-sm ${errBorder(errors.info_email)}`} />
-                                   <FieldError msg={errors.info_email} />
-               
-                                   <p className="text-sm font-bold">Address</p>
-                                   <AddressBlock
-                                     streetAddress={streetAddress} setStreetAddress={setStreetAddress}
-                                     city={city} setCity={setCity}
-                                     country={country} setCountry={setCountry}
-                                     stateVal={stateVal} setStateVal={setStateVal}
-                                     landmark={landmark} setLandmark={setLandmark}
-                                     errors={{
-                                       country: errors.info_country,
-                                       state: errors.info_state,
-                                       city: errors.info_city,
-                                       street: errors.info_address,
-                                     }}
-                                   />
-                                 </div>
-                               )}
+                {/* ── Secondary Service Upsells ─────────────────────────── */}
+                {primaryService && secondaryOptions.length > 0 && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-bold text-lg">Would You Like to Add Any of These?</h3>
+                    <p className="text-sm text-gray-500">These optional services can be bundled with your {primaryService} request.</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      {secondaryOptions.map(opt => {
+                        const isChosen = addOns.includes(opt.id);
+                        return (
+                          <div key={opt.id}>
+                            <label
+                              className={`flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${isChosen ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChosen}
+                                onChange={() => toggleAddOn(opt.id)}
+                                className="mt-0.5"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <p className="font-semibold text-gray-800 text-sm">{opt.label}</p>
+                                  <span className="text-sm font-bold text-blue-600">{opt.price}</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+                              </div>
+                            </label>
 
-                {/* All remaining sections (Company Verification, Authorization, Personal Info, Order Summary, Confirmation) are unchanged from your original file */}
-                {/* ... (they remain exactly as you provided) ... */}
+                            {isChosen && opt.id === 'representation' && (
+                              <div className="border-2 border-blue-200 border-t-0 rounded-b-xl bg-blue-50/40 px-4 pb-4">
+                                <RepresentationDetails isAddOn />
+                              </div>
+                            )}
+                            {isChosen && opt.id === 'retrieval' && (
+                              <div className="border-2 border-blue-200 border-t-0 rounded-b-xl bg-blue-50/40 px-4 pb-4">
+                                <RetrievalDetails isAddOn />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Document Category ──────────────────────────────────── */}
+                {needsDocCategory && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-bold text-lg">Document Category</h3>
+                    <p className="text-sm">Is this a Company Document or Personal Document?</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-error={!!errors.docCategory}>
+                      <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer ${isCompanyDocument === 'company' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}>
+                        <input type="radio" name="docCategory" checked={isCompanyDocument === 'company'} onChange={() => setIsCompanyDocument('company')} />
+                        <FaBuilding className="text-blue-500" /> <span>Company Document</span>
+                      </label>
+                      <label className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer ${isCompanyDocument === 'personal' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}>
+                        <input type="radio" name="docCategory" checked={isCompanyDocument === 'personal'} onChange={() => setIsCompanyDocument('personal')} />
+                        <FaUser className="text-blue-500" /> <span>Personal / Individual</span>
+                      </label>
+                    </div>
+                    <FieldError msg={errors.docCategory} />
+                  </div>
+                )}
+
+                {/* ── Company Verification ───────────────────────────────── */}
+                {needsDocCategory && isCompanyDocument === 'company' && (
+                  <div className="space-y-4 pt-4 border-t bg-gray-50 p-4 rounded">
+                    <h3 className="font-bold text-lg flex items-center gap-2"><FaBuilding /> Company Verification</h3>
+                    <input type="text" placeholder="Company Name" value={companyName}
+                      onChange={e => setCompanyName(e.target.value)} data-error={!!errors.company_name}
+                      className={`w-full border p-3 text-sm bg-white ${errBorder(errors.company_name)}`} />
+                    <FieldError msg={errors.company_name} />
+                    <input type="text" placeholder="Company Registration Number (CAC)" value={companyCac}
+                      onChange={e => setCompanyCac(e.target.value)} data-error={!!errors.company_cac}
+                      className={`w-full border p-3 text-sm bg-white ${errBorder(errors.company_cac)}`} />
+                    <FieldError msg={errors.company_cac} />
+
+                    <p className="text-sm font-bold">Company Address</p>
+                    <AddressBlock
+                      streetAddress={companyStreet} setStreetAddress={setCompanyStreet}
+                      city={companyCity} setCity={setCompanyCity}
+                      country={companyCountry} setCountry={setCompanyCountry}
+                      stateVal={companyState} setStateVal={setCompanyState}
+                    />
+
+                    <p className="text-sm font-bold pt-2">Your Position in the Company:</p>
+                    <div className="flex flex-wrap gap-6" data-error={!!errors.company_position}>
+                      {['Director', 'Manager', 'Staff', 'Other'].map(pos => (
+                        <label key={pos} className="flex items-center gap-2">
+                          <input type="radio" name="pos" checked={companyPosition === pos} onChange={() => setCompanyPosition(pos)} /> {pos}
+                        </label>
+                      ))}
+                    </div>
+                    <FieldError msg={errors.company_position} />
+                    <label className="text-xs font-bold block">Upload Office ID Card</label>
+                    <input type="file" data-error={!!errors.company_idCard}
+                      onChange={e => setCompanyIdCard(e.target.files?.[0] ?? null)}
+                      className={`w-full border p-2 bg-white ${errBorder(errors.company_idCard)}`} />
+                    <FieldError msg={errors.company_idCard} />
+                    <p className="font-bold text-sm underline pt-4">Company Authorization Method</p>
+                    <div data-error={!!errors.company_auth}>
+                      <label className="flex items-center gap-2 font-medium text-sm">
+                        <input type="radio" name="c-auth" checked={companyAuthMethod === 'otp'}
+                          onChange={() => { setCompanyAuthMethod('otp'); setOtpSent(null); }} />
+                        Verify via OTP (pulled from CAC records)
+                      </label>
+                      {companyAuthMethod === 'otp' && (
+                        <div className="pl-6 space-y-3 mt-2">
+                          <p className="text-xs text-gray-500">Your registered contact details will be retrieved automatically from the CAC database.</p>
+                          <div className="flex gap-3">
+                            <button type="button" onClick={() => setOtpSent('email')}
+                              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-sm font-semibold transition-all ${otpSent === 'email' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}>
+                              <MdEmail className="text-base" /> Get OTP via Email
+                            </button>
+                            <button type="button" onClick={() => setOtpSent('mobile')}
+                              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-sm font-semibold transition-all ${otpSent === 'mobile' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'}`}>
+                              <MdPhone className="text-base" /> Get OTP via Mobile
+                            </button>
+                          </div>
+                          {otpSent && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-green-700 font-medium">OTP sent to your CAC-registered {otpSent === 'email' ? 'email address' : 'mobile number'}.</p>
+                              <input type="text" placeholder="Enter OTP" value={otpValue}
+                                onChange={e => setOtpValue(e.target.value)} data-error={!!errors.company_otp}
+                                className={`w-full border p-2 text-sm bg-white ${errBorder(errors.company_otp)}`} />
+                              <FieldError msg={errors.company_otp} />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <label className="flex items-center gap-2 mt-4 font-medium text-sm">
+                        <input type="radio" name="c-auth" checked={companyAuthMethod === 'letter'}
+                          onChange={() => { setCompanyAuthMethod('letter'); setOtpSent(null); }} />
+                        Upload Signed / Stamped Authorization Letter
+                      </label>
+                      {companyAuthMethod === 'letter' && (
+                        <div className="pl-6 mt-2">
+                          <input type="file" onChange={e => setCompanyAuthLetter(e.target.files?.[0] ?? null)} className="w-full border p-2 bg-white" />
+                        </div>
+                      )}
+                    </div>
+                    <FieldError msg={errors.company_auth} />
+                  </div>
+                )}
+
+                {/* ── Authorization & Identity ───────────────────────────── */}
+                {needsAuthSection && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-bold text-lg">Authorization & Identity Verification (REQUIRED)</h3>
+                    <p className="text-sm font-bold">Letter of Authorization:</p>
+                    <input type="file" data-error={!!errors.auth_letter}
+                      onChange={e => setAuthLetter(e.target.files?.[0] ?? null)}
+                      className={`w-full border p-2 ${errBorder(errors.auth_letter)}`} />
+                    <FieldError msg={errors.auth_letter} />
+                    <p className="text-sm font-bold">Identity Verification:</p>
+                    <select value={identityType} onChange={e => setIdentityType(e.target.value)}
+                      data-error={!!errors.identity_type}
+                      className={`w-full border p-3 text-sm ${errBorder(errors.identity_type)}`}>
+                      <option value="">Select ID Type...</option>
+                      <option value="nin">NIN</option>
+                      <option value="passport">International Passport</option>
+                    </select>
+                    <FieldError msg={errors.identity_type} />
+                    <input type="text" placeholder="ID Number" value={identityNumber}
+                      onChange={e => setIdentityNumber(e.target.value)} data-error={!!errors.identity_number}
+                      className={`w-full border p-3 text-sm ${errBorder(errors.identity_number)}`} />
+                    <FieldError msg={errors.identity_number} />
+                    <label className="text-xs font-bold block">Upload ID Image</label>
+                    <input type="file" data-error={!!errors.identity_image}
+                      onChange={e => setIdentityImage(e.target.files?.[0] ?? null)}
+                      className={`w-full border p-2 ${errBorder(errors.identity_image)}`} />
+                    <FieldError msg={errors.identity_image} />
+                    <label className="text-xs font-bold block">Upload Your Photo (Selfie)</label>
+                    <input type="file" data-error={!!errors.identity_selfie}
+                      onChange={e => setIdentitySelfie(e.target.files?.[0] ?? null)}
+                      className={`w-full border p-2 ${errBorder(errors.identity_selfie)}`} />
+                    <FieldError msg={errors.identity_selfie} />
+                  </div>
+                )}
+
+                {/* ── Personal Information ───────────────────────────────── */}
+                {needsAuthSection && (
+                  <div className="space-y-4 pt-4 border-t">
+                    <h3 className="font-bold text-lg">Your Information</h3>
+                    <input type="text" placeholder="Full Name" value={fullName}
+                      onChange={e => setFullName(e.target.value)} data-error={!!errors.info_name}
+                      className={`w-full border p-3 text-sm ${errBorder(errors.info_name)}`} />
+                    <FieldError msg={errors.info_name} />
+                    <input type="tel" placeholder="Phone Number" value={phone}
+                      onChange={e => setPhone(e.target.value)} data-error={!!errors.info_phone}
+                      className={`w-full border p-3 text-sm ${errBorder(errors.info_phone)}`} />
+                    <FieldError msg={errors.info_phone} />
+                    <input type="email" placeholder="Email" value={email}
+                      onChange={e => setEmail(e.target.value)} data-error={!!errors.info_email}
+                      className={`w-full border p-3 text-sm ${errBorder(errors.info_email)}`} />
+                    <FieldError msg={errors.info_email} />
+
+                    <p className="text-sm font-bold">Address</p>
+                    <AddressBlock
+                      streetAddress={streetAddress} setStreetAddress={setStreetAddress}
+                      city={city} setCity={setCity}
+                      country={country} setCountry={setCountry}
+                      stateVal={stateVal} setStateVal={setStateVal}
+                      landmark={landmark} setLandmark={setLandmark}
+                      errors={{
+                        country: errors.info_country,
+                        state: errors.info_state,
+                        city: errors.info_city,
+                        street: errors.info_address,
+                      }}
+                    />
+                  </div>
+                )}
 
                 {/* ── Order Summary ──────────────────────────────────────── */}
                 {lineItems.length > 0 && (

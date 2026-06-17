@@ -1,48 +1,41 @@
-
-
 "use client";
- 
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiCheckCircle, HiX, HiOutlineCheck } from 'react-icons/hi';
 import { HiOutlineSparkles } from 'react-icons/hi';
 import { MdOutlineLocalPrintshop, MdOutlineDocumentScanner, MdOutlineDeliveryDining } from 'react-icons/md';
- 
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Plan = {
   name: string;
-  price: string;
   description: string;
   features: string[];
   featured?: boolean;
   badge?: string;
 };
- 
+
 // ─── Pricing data ─────────────────────────────────────────────────────────────
 const categories: Record<string, Plan[]> = {
   Submission: [
     {
       name: 'Submission Only',
-      price: '₦35,000',
       description: 'Document handling and submission to the required office or desk.',
       features: ['Document handling', 'Official desk delivery', 'Basic confirmation'],
     },
     {
       name: 'Submission + Follow Up',
-      price: '₦65,000',
       description: 'Submit your document and track its progress with follow-up updates.',
       features: ['Document submission', 'Progress tracking', 'Status updates'],
     },
     {
       name: 'Submission + Representation',
-      price: '₦85,000',
       description: 'Submit and have someone physically present at the office on your behalf.',
       features: ['Document submission', 'Physical attendance', 'Agency presence'],
     },
     {
       name: 'Submission + Retrieval',
-      price: '₦120,000',
       description: 'Full end-to-end: submit, follow up, represent, and retrieve your document.',
       features: ['All services included', 'End-to-end handling', 'Priority processing'],
       featured: true,
@@ -52,25 +45,21 @@ const categories: Record<string, Plan[]> = {
   'Follow Up': [
     {
       name: 'Follow Up Only',
-      price: '₦35,000',
       description: 'One-time status check or inquiry on an existing submission.',
       features: ['One-time check', 'Progress report', 'Inquiry handling'],
     },
     {
       name: 'Follow Up + Representation',
-      price: '₦75,000',
       description: 'Track your document and have someone present at the office if needed.',
       features: ['Status tracking', 'Physical attendance', 'Agency presence'],
     },
     {
       name: 'Follow Up + Retrieval',
-      price: '₦60,000',
       description: 'Monitor progress and collect the document once it is ready.',
       features: ['Progress monitoring', 'Secure pickup', 'Document delivery'],
     },
     {
       name: 'Follow Up + Submission',
-      price: '₦120,000',
       description: 'Full end-to-end: submit, follow up, represent, and retrieve your document.',
       features: ['All services included', 'End-to-end handling', 'Priority processing'],
       featured: true,
@@ -80,25 +69,21 @@ const categories: Record<string, Plan[]> = {
   Representation: [
     {
       name: 'Representation Only',
-      price: '₦50,000',
       description: 'Physical attendance at an office or meeting on your behalf (per 2 hours).',
       features: ['Physical attendance', 'Agency presence', 'Client proxy'],
     },
     {
       name: 'Representation + Follow Up',
-      price: '₦75,000',
       description: 'Attend on your behalf and provide continued tracking after the visit.',
       features: ['Physical attendance', 'Post-visit tracking', 'Status updates'],
     },
     {
       name: 'Representation + Retrieval',
-      price: '₦75,000',
       description: 'Attend on your behalf and collect documents at the same visit.',
       features: ['Physical attendance', 'Document pickup', 'Secure delivery'],
     },
     {
       name: 'Representation + Submission',
-      price: '₦120,000',
       description: 'Full end-to-end: submit, follow up, represent, and retrieve your document.',
       features: ['All services included', 'End-to-end handling', 'Priority processing'],
       featured: true,
@@ -108,13 +93,11 @@ const categories: Record<string, Plan[]> = {
   Retrieval: [
     {
       name: 'Retrieval Only',
-      price: '₦35,000',
       description: 'Official document retrieval and secure handling.',
       features: ['Secure pickup', 'Physical/digital delivery', 'Proof of receipt'],
     },
     {
       name: 'Retrieval + Submission',
-      price: '₦120,000',
       description: 'Full end-to-end: submit, follow up, represent, and retrieve your document.',
       features: ['All services included', 'End-to-end handling', 'Priority processing'],
       featured: true,
@@ -122,57 +105,48 @@ const categories: Record<string, Plan[]> = {
     },
     {
       name: 'Retrieval + Follow Up',
-      price: '₦60,000',
       description: 'Track your document and collect it once processing is complete.',
       features: ['Progress monitoring', 'Secure pickup', 'Delivery confirmation'],
     },
     {
       name: 'Retrieval + Representation',
-      price: '₦75,000',
       description: 'Have someone attend on your behalf and collect the document.',
       features: ['Physical attendance', 'Document pickup', 'Secure delivery'],
     },
   ],
 };
- 
+
 // ─── Custom service options ───────────────────────────────────────────────────
-const CUSTOM_OPTIONS: Record<string, { price: number; icon: React.ReactNode }> = {
-  'Submission':                      { price: 35_000, icon: <HiCheckCircle size={15} /> },
-  'Follow Up':                       { price: 35_000, icon: <HiCheckCircle size={15} /> },
-  'Representation':                  { price: 50_000, icon: <HiCheckCircle size={15} /> },
-  'Retrieval':                       { price: 35_000, icon: <HiCheckCircle size={15} /> },
-  'Printing':                        { price: 1_000,  icon: <MdOutlineLocalPrintshop size={15} /> },
-  'Scanning':                        { price: 500,    icon: <MdOutlineDocumentScanner size={15} /> },
-  'Proposal Delivery':               { price: 15_000, icon: <MdOutlineDeliveryDining size={15} /> },
-  'Meeting Attendance':              { price: 40_000, icon: <HiCheckCircle size={15} /> },
-  'Interview Representation':        { price: 60_000, icon: <HiCheckCircle size={15} /> },
-  'Document Pickup':                 { price: 10_000, icon: <HiCheckCircle size={15} /> },
-  'Document Delivery':               { price: 10_000, icon: <HiCheckCircle size={15} /> },
-  'Queue Standing':                  { price: 35_000, icon: <HiCheckCircle size={15} /> },
-  'Government Processing Assistance':{ price: 50_000, icon: <HiCheckCircle size={15} /> },
-  'Office Visit':                    { price: 50_000, icon: <HiCheckCircle size={15} /> },
-  'Custom Request':                  { price: 0,      icon: <HiOutlineSparkles size={15} /> },
+const CUSTOM_OPTIONS: Record<string, { icon: React.ReactNode }> = {
+  'Submission':                      { icon: <HiCheckCircle size={15} /> },
+  'Follow Up':                       { icon: <HiCheckCircle size={15} /> },
+  'Representation':                  { icon: <HiCheckCircle size={15} /> },
+  'Retrieval':                       { icon: <HiCheckCircle size={15} /> },
+  'Printing':                        { icon: <MdOutlineLocalPrintshop size={15} /> },
+  'Scanning':                        { icon: <MdOutlineDocumentScanner size={15} /> },
+  'Proposal Delivery':               { icon: <MdOutlineDeliveryDining size={15} /> },
+  'Meeting Attendance':              { icon: <HiCheckCircle size={15} /> },
+  'Interview Representation':        { icon: <HiCheckCircle size={15} /> },
+  'Document Pickup':                 { icon: <HiCheckCircle size={15} /> },
+  'Document Delivery':               { icon: <HiCheckCircle size={15} /> },
+  'Queue Standing':                  { icon: <HiCheckCircle size={15} /> },
+  'Government Processing Assistance':{ icon: <HiCheckCircle size={15} /> },
+  'Office Visit':                    { icon: <HiCheckCircle size={15} /> },
+  'Custom Request':                  { icon: <HiOutlineSparkles size={15} /> },
 };
- 
-function fmt(n: number) {
-  return '₦' + n.toLocaleString('en-NG');
-}
- 
+
 const TABS = [...Object.keys(categories), 'Customize'];
- 
+
 // ─── Customize tab ────────────────────────────────────────────────────────────
 function CustomizeTab() {
   const [selected, setSelected] = useState<string[]>([]);
- 
+
   const toggle = (item: string) => {
     setSelected(prev =>
       prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
     );
   };
- 
-  const total = selected.reduce((sum, s) => sum + (CUSTOM_OPTIONS[s]?.price || 0), 0);
-  const hasCustom = selected.includes('Custom Request');
- 
+
   return (
     <motion.div
       key="customize"
@@ -184,9 +158,9 @@ function CustomizeTab() {
       <p className="text-center text-sm text-gray-500 mb-8 max-w-lg mx-auto">
         Build your own service combination based on exactly what you need SubmitAR to handle.
       </p>
- 
+
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
-        {Object.entries(CUSTOM_OPTIONS).map(([item, { price, icon }]) => {
+        {Object.entries(CUSTOM_OPTIONS).map(([item, { icon }]) => {
           const isSelected = selected.includes(item);
           return (
             <button
@@ -205,14 +179,11 @@ function CustomizeTab() {
               )}
               <span className={isSelected ? 'text-blue-600' : 'text-gray-400'}>{icon}</span>
               <span className="text-xs font-semibold leading-tight">{item}</span>
-              <span className={`text-[10px] font-bold ${isSelected ? 'text-blue-600' : 'text-gray-400'}`}>
-                {price > 0 ? fmt(price) : 'Quote'}
-              </span>
             </button>
           );
         })}
       </div>
- 
+
       <AnimatePresence>
         {selected.length > 0 && (
           <motion.div
@@ -222,7 +193,7 @@ function CustomizeTab() {
             className="overflow-hidden"
           >
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-2">
                 {selected.map(s => (
                   <span
                     key={s}
@@ -235,18 +206,6 @@ function CustomizeTab() {
                   </span>
                 ))}
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-blue-200">
-                <div>
-                  <p className="text-xs text-blue-500 font-medium uppercase tracking-wide">Estimated Total</p>
-                  {hasCustom && (
-                    <p className="text-[10px] text-amber-600 mt-0.5">Custom Request requires a quote</p>
-                  )}
-                </div>
-                <p className="text-2xl font-extrabold text-[#0052cc]">
-                  {total > 0 ? fmt(total) : 'Get a Quote'}
-                  {hasCustom && total > 0 && <span className="text-xs font-normal text-gray-400 ml-1">+</span>}
-                </p>
-              </div>
             </div>
             <Link
               href="/submitar"
@@ -257,33 +216,28 @@ function CustomizeTab() {
           </motion.div>
         )}
       </AnimatePresence>
- 
+
       {selected.length === 0 && (
         <p className="text-center text-xs text-gray-400 mt-2 mb-20">
-          Select any combination above to see your estimated total
+          Select any combination above to build your custom bundle
         </p>
       )}
     </motion.div>
   );
 }
- 
+
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function Pricing() {
   const [activeTab, setActiveTab] = useState('Submission');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedService, setSelectedService] = useState('');
- 
-  const handleCustomClick = (serviceName: string) => {
-    setSelectedService(serviceName);
-    setIsModalOpen(true);
-  };
- 
+
   const plans = categories[activeTab] ?? [];
- 
+
   return (
     <section id="Pricing" className="bg-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
- 
+
         <motion.h2
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -293,7 +247,7 @@ export default function Pricing() {
         >
           Service Packages
         </motion.h2>
- 
+
         {/* ── Tab bar ────────────────────────────────────────────────────── */}
         <div className="flex flex-wrap justify-center gap-2 mb-12">
           {TABS.map(tab => (
@@ -311,10 +265,10 @@ export default function Pricing() {
             </button>
           ))}
         </div>
- 
+
         {/* ── Customize tab ──────────────────────────────────────────────── */}
         {activeTab === 'Customize' && <CustomizeTab />}
- 
+
         {/* ── Service plan cards ──────────────────────────────────────────── */}
         {activeTab !== 'Customize' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
@@ -339,11 +293,10 @@ export default function Pricing() {
                       {plan.badge}
                     </span>
                   )}
- 
-                  <h3 className="text-base font-bold text-gray-900 mb-1 pr-10">{plan.name}</h3>
-                  <p className="text-xl font-extrabold text-black mb-3">{plan.price}</p>
+
+                  <h3 className="text-base font-bold text-gray-900 mb-3 pr-10">{plan.name}</h3>
                   <p className="text-xs text-gray-500 mb-5 leading-relaxed">{plan.description}</p>
- 
+
                   <ul className="space-y-2 flex-grow mb-6">
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-center text-xs text-gray-600">
@@ -351,7 +304,7 @@ export default function Pricing() {
                       </li>
                     ))}
                   </ul>
- 
+
                   <Link
                     href="/submitar"
                     className={`w-full block text-center py-2.5 rounded-lg text-sm font-bold transition-colors ${
@@ -367,7 +320,7 @@ export default function Pricing() {
             </AnimatePresence>
           </div>
         )}
- 
+
         {/* ── CTA banner ─────────────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -392,7 +345,7 @@ export default function Pricing() {
           </Link>
         </motion.div>
       </div>
- 
+
       {/* ── Quote modal ────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isModalOpen && (
@@ -428,4 +381,3 @@ export default function Pricing() {
     </section>
   );
 }
- 

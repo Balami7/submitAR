@@ -4,11 +4,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
-import RecallModal from "./RecallModal";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [recallModalOpen, setRecallModalOpen] = useState(false);
 
   // TODO: Replace with real auth (Context or session) later
   const isAdminLoggedIn = false;   // Change this dynamically later
@@ -82,13 +80,12 @@ export default function Header() {
                 Log Out
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => setRecallModalOpen(true)}
+              <Link
+                href="/track"
                 className="bg-[#0052cc] hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-all"
               >
                 Track Your Order
-              </button>
+              </Link>
             )}
           </div>
 
@@ -126,24 +123,19 @@ export default function Header() {
                     Log Out
                   </button>
                 ) : (
-                  <button
-                    onClick={() => { setIsOpen(false); setRecallModalOpen(true); }}
-                    className="w-full bg-[#0052cc] text-white py-3 rounded-lg font-semibold"
+                  <Link
+                    href="/track"
+                    onClick={() => setIsOpen(false)}
+                    className="block text-center w-full bg-[#0052cc] text-white py-3 rounded-lg font-semibold"
                   >
                     Track Your Order
-                  </button>
+                  </Link>
                 )}
               </div>
             </nav>
           </div>
         )}
       </header>
-
-      <RecallModal
-        isOpen={recallModalOpen}
-        onClose={() => setRecallModalOpen(false)}
-        onVerified={(identifier) => console.log("Verified:", identifier)}
-      />
     </>
   );
 }

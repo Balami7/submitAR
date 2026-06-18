@@ -10,17 +10,18 @@ export default function ReviewPage() {
   const [paying, setPaying] = useState(false);
 
   const handlePay = async () => {
-    if (!data?.email) {
-      alert('No email found for this order. Please go back and add your email.');
-      return;
-    }
     setPaying(true);
     try {
+      // Paystack requires an email; fall back to a placeholder when the order has none.
+      const email =
+        data?.email ||
+        `order-${(data?.csn || 'unknown').toString().replace(/[^a-z0-9]/gi, '').toLowerCase()}@submitar.app`;
+
       const res = await fetch('/api/paystack/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: data.email,
+          email,
           amount: data.total,
           csn: data.csn,
         }),

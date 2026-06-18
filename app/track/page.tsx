@@ -98,7 +98,7 @@ function TrackContent() {
       <div className="min-h-screen bg-gray-50 pt-10 pb-16 px-4">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Track your order</h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-700 mb-8">
             Enter your order number (CSN) and the email you used.
           </p>
 
@@ -146,7 +146,7 @@ function TrackContent() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm text-gray-500">Order number</p>
+                  <p className="text-sm text-gray-600">Order number</p>
                   <p className="text-xl font-bold text-gray-900">{order.csn}</p>
                 </div>
                 <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${STATUS_COLORS[order.status] ?? 'bg-gray-100 text-gray-800'}`}>
@@ -163,7 +163,7 @@ function TrackContent() {
                       return (
                         <div key={step} className="flex-1 text-center">
                           <div className={`w-4 h-4 mx-auto rounded-full ${reached ? 'bg-blue-600' : 'bg-gray-300'}`} />
-                          <p className={`text-xs mt-2 ${reached ? 'text-blue-700 font-medium' : 'text-gray-400'}`}>
+                          <p className={`text-xs mt-2 ${reached ? 'text-blue-700 font-semibold' : 'text-gray-500'}`}>
                             {STATUS_LABELS[step]}
                           </p>
                         </div>
@@ -180,7 +180,7 @@ function TrackContent() {
                   <div className="space-y-2">
                     {order.lineItems.map((item: any, i: number) => (
                       <div key={i} className="flex justify-between text-sm">
-                        <span className="text-gray-700">{item.label}</span>
+                        <span className="text-gray-800">{item.label}</span>
                         <span className="font-medium text-gray-900">₦{Number(item.amount).toLocaleString()}</span>
                       </div>
                     ))}
@@ -198,12 +198,12 @@ function TrackContent() {
                 <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
                   {detailRows.map(([key, val]) => (
                     <div key={key}>
-                      <dt className="text-xs text-gray-500">{humanize(key)}</dt>
+                      <dt className="text-xs text-gray-600 font-medium">{humanize(key)}</dt>
                       <dd className="text-sm text-gray-900 break-words">{val}</dd>
                     </div>
                   ))}
                 </dl>
-                <p className="text-xs text-gray-400 mt-6">
+                <p className="text-xs text-gray-600 mt-6">
                   Placed on {new Date(order.createdAt).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })}
                 </p>
               </div>

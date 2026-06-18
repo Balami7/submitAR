@@ -99,7 +99,7 @@ export default function ReviewPage() {
                 Approved
               </span>
             </div>
-            <p className="text-gray-500 text-sm mt-1">Order {data.csn || 'Pending'}</p>
+            <p className="text-gray-600 text-sm mt-1">Order {data.csn || 'Pending'}</p>
           </div>
 
           {/* Service breakdown */}
@@ -110,7 +110,7 @@ export default function ReviewPage() {
                 <div key={index} className="flex justify-between py-3">
                   <div>
                     <p className="text-gray-800">{item.label}</p>
-                    {item.note && <p className="text-xs text-gray-400 mt-0.5">{item.note}</p>}
+                    {item.note && <p className="text-xs text-gray-500 mt-0.5">{item.note}</p>}
                   </div>
                   <p className="font-medium text-gray-900">₦{item.amount.toLocaleString()}</p>
                 </div>
@@ -131,7 +131,7 @@ export default function ReviewPage() {
               <dl className="space-y-3">
                 {contactRows.map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4">
-                    <dt className="text-sm text-gray-500">{label}</dt>
+                    <dt className="text-sm text-gray-600">{label}</dt>
                     <dd className="text-sm text-gray-900 text-right">{value}</dd>
                   </div>
                 ))}
@@ -156,7 +156,7 @@ export default function ReviewPage() {
             </button>
           </div>
 
-          <p className="text-center text-xs text-gray-400 mt-4">Secure payment powered by Paystack</p>
+          <p className="text-center text-xs text-gray-500 mt-4">Secure payment powered by Paystack</p>
         </div>
       </div>
     </>

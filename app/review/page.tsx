@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
-import { FaDownload, FaEdit } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
 
 export default function ReviewPage() {
   const [data, setData] = useState<any>(null);
@@ -78,99 +78,84 @@ export default function ReviewPage() {
     );
   }
 
+  const contactRows = [
+    ['Name', data.fullName],
+    ['Phone', data.phone],
+    ['Email', data.email],
+    ['Address', [data.streetAddress, data.city].filter(Boolean).join(', ')],
+  ].filter(([, value]) => value);
+
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-white">
-        <div className="max-w-6xl mx-auto py-12 px-6">
-          <div className="flex justify-between items-center mb-10">
-            <div>
-              <h1 className="text-4xl font-bold text-white">Order Summary</h1>
-              <p className="text-green-400 font-medium text-lg mt-2">CSN-{data.csn || 'PENDING'}</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-2xl mx-auto py-12 px-5">
+          {/* Heading */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold text-gray-900">Review your order</h1>
+              <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-200">
+                Approved
+              </span>
             </div>
-            <span className="px-6 py-2 bg-green-500 text-white rounded-full font-medium text-lg">Approved</span>
+            <p className="text-gray-500 text-sm mt-1">Order {data.csn || 'Pending'}</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            {/* Left - Order Summary */}
-            <div className="lg:col-span-2">
-              <div className="bg-gray-800 border border-gray-700 rounded-3xl p-8 shadow-lg">
-                <h2 className="text-2xl font-bold mb-6 text-white">Service Breakdown</h2>
-                <div className="space-y-5">
-                  {data.lineItems?.map((item: any, index: number) => (
-                    <div key={index} className="flex justify-between border-b border-gray-700 pb-4">
-                      <div>
-                        <p className="font-medium text-gray-200">{item.label}</p>
-                        {item.note && <p className="text-xs text-green-400 mt-0.5">{item.note}</p>}
-                      </div>
-                      <p className="font-semibold text-right text-gray-100">₦{item.amount.toLocaleString()}</p>
-                    </div>
-                  ))}
-                  <div className="pt-6 border-t border-gray-700 flex justify-between text-3xl font-bold text-green-400">
-                    <span>Total</span>
-                    <span>₦{typeof data.total === 'number' ? data.total.toLocaleString() : data.total}</span>
+          {/* Service breakdown */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-5">
+            <h2 className="text-base font-semibold text-gray-900 mb-4">Service breakdown</h2>
+            <div className="divide-y divide-gray-100">
+              {data.lineItems?.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between py-3">
+                  <div>
+                    <p className="text-gray-800">{item.label}</p>
+                    {item.note && <p className="text-xs text-gray-400 mt-0.5">{item.note}</p>}
                   </div>
+                  <p className="font-medium text-gray-900">₦{item.amount.toLocaleString()}</p>
                 </div>
-              </div>
-
-              <div className="mt-6 bg-gray-800 border border-gray-700 rounded-3xl p-8 shadow-lg">
-                <h3 className="font-bold mb-6 text-white text-lg">Contact Information</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Name</p>
-                    <p className="text-white font-medium">{data.fullName || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Phone</p>
-                    <p className="text-white font-medium">{data.phone || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Email</p>
-                    <p className="text-white font-medium">{data.email || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Address</p>
-                    <p className="text-white font-medium">{data.streetAddress || 'N/A'}, {data.city || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
-
-            {/* Right - Document Preview */}
-            <div className="lg:col-span-3">
-              <div className="bg-gray-800 border border-gray-700 rounded-3xl overflow-hidden shadow-lg">
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-6 flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-lg">Business Proposal</p>
-                    <p className="text-sm opacity-90">Document Creation • Ready for Review</p>
-                  </div>
-                  <FaDownload className="text-3xl" />
-                </div>
-
-                <div className="p-16 bg-gray-900 min-h-[480px] flex flex-col items-center justify-center border-b border-gray-700">
-                  <div className="text-[120px] mb-6 opacity-50">📄</div>
-                  <p className="text-2xl font-medium text-gray-300">Document Preview</p>
-                  <p className="text-gray-400 mt-3 text-center max-w-md">Your final document will be available here after approval and payment.</p>
-                </div>
-
-                <div className="p-6 flex gap-4">
-                  <button
-                    onClick={() => window.history.back()}
-                    className="flex-1 flex items-center justify-center gap-2 border border-gray-600 py-4 rounded-2xl font-medium text-white hover:bg-gray-700 transition-colors"
-                  >
-                    <FaEdit /> Edit Request
-                  </button>
-                  <button
-                    onClick={handlePay}
-                    disabled={paying}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-2xl font-semibold text-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {paying ? 'Redirecting to Paystack...' : 'Confirm & Pay'}
-                  </button>
-                </div>
-              </div>
+            <div className="flex justify-between items-center pt-4 mt-2 border-t border-gray-200">
+              <span className="font-semibold text-gray-900">Total</span>
+              <span className="text-xl font-bold text-gray-900">
+                ₦{typeof data.total === 'number' ? data.total.toLocaleString() : data.total}
+              </span>
             </div>
           </div>
+
+          {/* Contact information */}
+          {contactRows.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-5">
+              <h2 className="text-base font-semibold text-gray-900 mb-4">Contact information</h2>
+              <dl className="space-y-3">
+                {contactRows.map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-4">
+                    <dt className="text-sm text-gray-500">{label}</dt>
+                    <dd className="text-sm text-gray-900 text-right">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => window.history.back()}
+              className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-3.5 px-6 rounded-xl font-medium hover:bg-gray-100 transition-colors"
+            >
+              <FaEdit /> Edit request
+            </button>
+            <button
+              onClick={handlePay}
+              disabled={paying}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-xl font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {paying ? 'Redirecting to Paystack…' : 'Confirm & Pay'}
+            </button>
+          </div>
+
+          <p className="text-center text-xs text-gray-400 mt-4">Secure payment powered by Paystack</p>
         </div>
       </div>
     </>

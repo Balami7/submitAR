@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { HiX, HiPhone, HiMail } from "react-icons/hi";
+import { HiX } from "react-icons/hi";
 
 interface RecallModalProps {
   isOpen: boolean;
@@ -10,9 +10,7 @@ interface RecallModalProps {
 }
 
 export default function RecallModal({ isOpen, onClose, onVerified }: RecallModalProps) {
-  const [method, setMethod] = useState<"phone" | "email">("phone");
   const [step, setStep] = useState<"input" | "otp">("input");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,20 +19,13 @@ export default function RecallModal({ isOpen, onClose, onVerified }: RecallModal
 
   if (!isOpen) return null;
 
-  const identifier = method === "phone" ? phoneNumber : email;
+  const identifier = email;
 
   const handleSendOtp = () => {
     setError("");
-    if (method === "phone") {
-      if (!phoneNumber || phoneNumber.replace(/\D/g, "").length < 10) {
-        setError("Please enter a valid phone number");
-        return;
-      }
-    } else {
-      if (!email || !email.includes("@") || !email.includes(".")) {
-        setError("Please enter a valid email address");
-        return;
-      }
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email address");
+      return;
     }
     setLoading(true);
     setTimeout(() => {
@@ -110,99 +101,31 @@ export default function RecallModal({ isOpen, onClose, onVerified }: RecallModal
         {step === "input" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <p style={{ color: "#6b7280", fontSize: "14px", margin: 0 }}>
-              Track, or Retrieve your saved order using your phone number or email address.
+              Track, or Retrieve your saved order using your email address.
             </p>
 
-            {/* Method selector */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              <button
-                type="button"
-                onClick={() => { setMethod("phone"); setError(""); }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "10px 16px",
-                  borderRadius: "8px",
-                  border: method === "phone" ? "2px solid #2563eb" : "1px solid #e5e7eb",
-                  backgroundColor: method === "phone" ? "#eff6ff" : "#ffffff",
-                  color: method === "phone" ? "#2563eb" : "#6b7280",
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  cursor: "pointer",
-                }}
-              >
-                <HiPhone size={16} /> Phone
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMethod("email"); setError(""); }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  padding: "10px 16px",
-                  borderRadius: "8px",
-                  border: method === "email" ? "2px solid #2563eb" : "1px solid #e5e7eb",
-                  backgroundColor: method === "email" ? "#eff6ff" : "#ffffff",
-                  color: method === "email" ? "#2563eb" : "#6b7280",
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  cursor: "pointer",
-                }}
-              >
-                <HiMail size={16} /> Email
-              </button>
-            </div>
-
             {/* Input */}
-            {method === "phone" ? (
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#111827", marginBottom: "8px" }}>
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  placeholder="+234 803 567 1112"
-                  value={phoneNumber}
-                  onChange={(e) => { setPhoneNumber(e.target.value); setError(""); }}
-                  style={{
-                    width: "100%",
-                    padding: "10px 16px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    color: "#111827",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            ) : (
-              <div>
-                <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#111827", marginBottom: "8px" }}>
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
-                  style={{
-                    width: "100%",
-                    padding: "10px 16px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    color: "#111827",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
-            )}
+            <div>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#111827", marginBottom: "8px" }}>
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                style={{
+                  width: "100%",
+                  padding: "10px 16px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  color: "#111827",
+                  outline: "none",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
 
             {error && <p style={{ color: "#ef4444", fontSize: "14px", margin: 0 }}>{error}</p>}
             {successMessage && <p style={{ color: "#22c55e", fontSize: "14px", margin: 0 }}>{successMessage}</p>}
@@ -298,7 +221,7 @@ export default function RecallModal({ isOpen, onClose, onVerified }: RecallModal
                 textDecoration: "underline",
               }}
             >
-              {method === "phone" ? "Change Phone Number" : "Change Email Address"}
+              Change Email Address
             </button>
           </div>
         )}

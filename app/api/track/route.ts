@@ -5,11 +5,11 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const rawCsn = searchParams.get('csn')?.trim();
-    const phone = searchParams.get('phone')?.trim();
+    const email = searchParams.get('email')?.trim();
 
-    if (!rawCsn || !phone) {
+    if (!rawCsn || !email) {
       return NextResponse.json(
-        { error: 'Please provide your order number and the phone number on the order.' },
+        { error: 'Please provide your order number and the email on the order.' },
         { status: 400 }
       );
     }
@@ -23,13 +23,13 @@ export async function GET(req: NextRequest) {
     const order = await prisma.order.findFirst({
       where: {
         csn: { in: csnCandidates },
-        phone,
+        email: { equals: email, mode: 'insensitive' },
       },
     });
 
     if (!order) {
       return NextResponse.json(
-        { error: 'No order found matching that order number and phone number. Please double-check and try again.' },
+        { error: 'No order found matching that order number and email. Please double-check and try again.' },
         { status: 404 }
       );
     }

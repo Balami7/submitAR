@@ -57,7 +57,7 @@ function formatValue(value: any): string | null {
 function TrackContent() {
   const searchParams = useSearchParams();
   const [csn, setCsn] = useState(searchParams.get('csn') ?? '');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [order, setOrder] = useState<any>(null);
@@ -66,14 +66,14 @@ function TrackContent() {
     e.preventDefault();
     setError('');
     setOrder(null);
-    if (!csn.trim() || !phone.trim()) {
-      setError('Please enter both your order number and phone number.');
+    if (!csn.trim() || !email.trim()) {
+      setError('Please enter both your order number and email.');
       return;
     }
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/track?csn=${encodeURIComponent(csn.trim())}&phone=${encodeURIComponent(phone.trim())}`
+        `/api/track?csn=${encodeURIComponent(csn.trim())}&email=${encodeURIComponent(email.trim())}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not find your order.');
@@ -99,7 +99,7 @@ function TrackContent() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Track your order</h1>
           <p className="text-gray-600 mb-8">
-            Enter your order number (CSN) and the phone number you used.
+            Enter your order number (CSN) and the email you used.
           </p>
 
           {/* Search form */}
@@ -116,12 +116,12 @@ function TrackContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone number on the order"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email on the order"
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
                 />
               </div>

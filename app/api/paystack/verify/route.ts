@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
       amount: data.data?.amount ? data.data.amount / 100 : null,
       status: data.data?.status ?? null,
       csn: data.data?.metadata?.csn ?? null,
+      email: data.data?.customer?.email ?? null,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

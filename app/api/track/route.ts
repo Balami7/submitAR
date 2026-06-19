@@ -4,32 +4,24 @@ import { prisma } from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const rawCsn = searchParams.get('csn')?.trim();
     const email = searchParams.get('email')?.trim();
 
-    if (!rawCsn || !email) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Please provide your order number and the email on the order.' },
+        { error: 'Please enter the email you used on the order.' },
         { status: 400 }
       );
     }
 
-    // Be forgiving about the CSN format: accept "CSN-1234567" or just "1234567"
-    const up = rawCsn.toUpperCase().replace(/\s/g, '');
-    const csnCandidates = Array.from(
-      new Set([up, up.startsWith('CSN-') ? up : `CSN-${up}`])
-    );
-
+    // Look up by email only — return the customer's most recent order.
     const order = await prisma.order.findFirst({
-      where: {
-        csn: { in: csnCandidates },
-        email: { equals: email, mode: 'insensitive' },
-      },
+      where: { email: { equals: email, mode: 'insensitive' } },
+      orderBy: { createdAt: 'desc' },
     });
 
     if (!order) {
       return NextResponse.json(
-        { error: 'No order found matching that order number and email. Please double-check and try again.' },
+        { error: 'No order found for that email. Please double-check and try again.' },
         { status: 404 }
       );
     }

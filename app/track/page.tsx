@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 
@@ -56,25 +56,21 @@ function formatValue(value: any): string | null {
 
 function TrackContent() {
   const searchParams = useSearchParams();
-  const [csn, setCsn] = useState(searchParams.get('csn') ?? '');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(searchParams.get('email') ?? '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [order, setOrder] = useState<any>(null);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const lookup = async (value: string) => {
     setError('');
     setOrder(null);
-    if (!csn.trim() || !email.trim()) {
-      setError('Please enter both your order number and email.');
+    if (!value.trim()) {
+      setError('Please enter the email you used on the order.');
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/track?csn=${encodeURIComponent(csn.trim())}&email=${encodeURIComponent(email.trim())}`
-      );
+      const res = await fetch(`/api/track?email=${encodeURIComponent(value.trim())}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not find your order.');
       setOrder(data.order);
@@ -84,6 +80,18 @@ function TrackContent() {
       setLoading(false);
     }
   };
+
+  const handleTrack = (e: React.FormEvent) => {
+    e.preventDefault();
+    lookup(email);
+  };
+
+  // Auto-track when an email is supplied in the URL (e.g. straight after payment).
+  useEffect(() => {
+    const initial = searchParams.get('email');
+    if (initial) lookup(initial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const detailRows = order
     ? Object.entries(order)
@@ -99,39 +107,25 @@ function TrackContent() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Track your order</h1>
           <p className="text-gray-700 mb-8">
-            Enter your order number (CSN) and the email you used.
+            Enter the email you used on the order.
           </p>
 
           {/* Search form */}
-          <form onSubmit={handleTrack} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Order number (CSN)</label>
-                <input
-                  type="text"
-                  value={csn}
-                  onChange={(e) => setCsn(e.target.value)}
-                  placeholder="e.g. CSN-1006626"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email on the order"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-            </div>
+          <form onSubmit={handleTrack} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+            <label className="block text-sm font-semibold text-gray-800 mb-1.5">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600"
+            />
             <button
               type="submit"
               disabled={loading}
               className="mt-4 w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors disabled:opacity-60"
             >
-              {loading ? 'Searching...' : 'Track order'}
+              {loading ? 'Searching…' : 'Track order'}
             </button>
           </form>
 

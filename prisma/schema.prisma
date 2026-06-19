@@ -111,6 +111,11 @@ model Order {
   status            OrderStatus @default(PENDING)
   adminNotes        String?
 
+  // Payment (Paystack)
+  paid              Boolean   @default(false)
+  paidAt            DateTime?
+  paymentRef        String?
+
   @@map("orders")
 }
 

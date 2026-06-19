@@ -106,7 +106,7 @@ export default function AdminSignIn() {
                 Secure Admin Access
               </p>
               <p className="text-center text-[9px] text-gray-400">
-                Only authorised personnel can access this area
+                Only authorized personnel can access this area
               </p>
             </div>
           </div>
